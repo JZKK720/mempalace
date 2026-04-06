@@ -72,6 +72,55 @@ Three mining modes: **projects** (code and docs), **convos** (conversation expor
 
 ---
 
+## How You Actually Use It
+
+After the one-time setup (install → init → mine), you don't run MemPalace commands manually. Your AI uses it for you. There are two ways, depending on which AI you use.
+
+### With Claude, ChatGPT, Cursor (MCP-compatible tools)
+
+```bash
+# Connect MemPalace once
+claude mcp add mempalace -- python -m mempalace.mcp_server
+```
+
+Now your AI has 19 tools available through MCP. Ask it anything:
+
+> *"What did we decide about auth last month?"*
+
+Claude calls `mempalace_search` automatically, gets verbatim results, and answers you. You never type `mempalace search` again. The AI handles it.
+
+### With local models (Llama, Mistral, or any offline LLM)
+
+Local models generally don't speak MCP yet. Two approaches:
+
+**1. Wake-up command** — load your world into the model's context:
+
+```bash
+mempalace wake-up > context.txt
+# Paste context.txt into your local model's system prompt
+```
+
+This gives your local model ~170 tokens of critical facts (in AAAK if you prefer) before you ask a single question.
+
+**2. CLI search** — query on demand, feed results into your prompt:
+
+```bash
+mempalace search "auth decisions" > results.txt
+# Include results.txt in your prompt
+```
+
+Or use the Python API:
+
+```python
+from mempalace.searcher import search_memories
+results = search_memories("auth decisions", palace_path="~/.mempalace/palace")
+# Inject into your local model's context
+```
+
+Either way — your entire memory stack runs offline. ChromaDB on your machine, Llama on your machine, AAAK for compression, zero cloud calls.
+
+---
+
 ## The Problem
 
 Decisions happen in conversations now. Not in docs. Not in Jira. In conversations with Claude, ChatGPT, Copilot. The reasoning, the tradeoffs, the "we tried X and it failed because Y" — all trapped in chat windows that evaporate when the session ends.
